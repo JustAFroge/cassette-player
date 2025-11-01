@@ -1,60 +1,45 @@
-diff --git a/CassettePlayer/css/knobKnob.css b/CassettePlayer/css/knobKnob.css
-index 625e19fb5fcd51f9587bdc00d6f75297f94cc804..73547846c3f13923064ed681a4c299d79decb680 100644
---- a/CassettePlayer/css/knobKnob.css
-+++ b/CassettePlayer/css/knobKnob.css
-@@ -1,43 +1,44 @@
- /*----------------------------
- 	knobKnob Styles
- -----------------------------*/
- .knob{
--	width: 100px;
--	height: 100px;
--	position: relative;
-+        width: clamp(70px, 15vw, 100px);
-+        height: clamp(70px, 15vw, 100px);
-+        position: relative;
- }
- 
- .knob .top{
--	position: absolute;
--	width: 100%;
--	height: 100%;
--	background: url(../images/knob.jpg) no-repeat center center;
--	z-index: 10;
--	cursor: default !important;
--	border-radius: 50%;
--	box-shadow: inset 0 0 3px 2px rgba(255,255,255,0.6);
-+        position: absolute;
-+        width: 100%;
-+        height: 100%;
-+        background: url(../images/knob.jpg) no-repeat center center;
-+        background-size: 100% 100%;
-+        z-index: 10;
-+        cursor: default !important;
-+        border-radius: 50%;
-+        box-shadow: inset 0 0 3px 2px rgba(255,255,255,0.6);
- }
- 
- .knob .base{
- 	width: 100%;
- 	height: 100%;
- 	box-shadow: 0 5px 0 #555, 0px 5px 5px black;
- 	position: absolute;
- 	z-index: 1;
- 	border-radius: 50%;
- }
- 
- .knob .top:after{
- 	content: '';
- 	width: 4px;
- 	height: 4px;
- 	background-color: #666;
- 	position: absolute;
- 	top: 50%;
- 	margin-top: -2px;
- 	left: 4px;
- 	border-radius: 50%;
- 	cursor: default !important;
- 	box-shadow:  
- 		0 0 1px #5a5a5a inset, 
- 		1px -1px 1px rgba(255,255,255,0.5);
+/*----------------------------
+  knobKnob Styles
+-----------------------------*/
+.knob {
+  width: clamp(70px, 15vw, 100px);
+  height: clamp(70px, 15vw, 100px);
+  position: relative;
+}
+
+.knob .top {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url("../images/knob.jpg") no-repeat center center;
+  background-size: 100% 100%;
+  z-index: 10;
+  cursor: default !important;
+  border-radius: 50%;
+  box-shadow: inset 0 0 3px 2px rgba(255, 255, 255, 0.6);
+}
+
+.knob .base {
+  width: 100%;
+  height: 100%;
+  box-shadow: 0 5px 0 #555, 0 5px 5px black;
+  position: absolute;
+  z-index: 1;
+  border-radius: 50%;
+}
+
+.knob .top::after {
+  content: "";
+  width: 4px;
+  height: 4px;
+  background-color: #666;
+  position: absolute;
+  top: 50%;
+  margin-top: -2px;
+  left: 4px;
+  border-radius: 50%;
+  cursor: default !important;
+  box-shadow:
+    0 0 1px #5a5a5a inset,
+    1px -1px 1px rgba(255, 255, 255, 0.5);
+}
