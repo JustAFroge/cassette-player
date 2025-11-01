@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Cassette Player - Deceptacon</title>
+    <link href='https://fonts.googleapis.com/css?family=Aldrich' rel='stylesheet' type='text/css' />
+    <style>
+        /* Normalize CSS - Essential reset */
+        * { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
+        html { font-size: 100%; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        body { margin: 0; }
+        audio:not([controls]) { display: none; height: 0; }
+
+        /* Icon font for player controls */
+        @font-face {
+            font-family: 'playericons';
+            src: url("css/fonts/playericons.eot");
+            src: url("css/fonts/playericons.eot?#iefix") format('embedded-opentype'), 
+                url("css/fonts/playericons.woff") format('woff'), 
+                url("css/fonts/playericons.ttf") format('truetype'), 
+                url("css/fonts/playericons.svg#playericons") format('svg');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        /* General Demo Style */
+        body {
+            font-family: Cambria, Georgia, serif;
+            background: transparent;
+            font-weight: 400;
+            font-size: 15px;
+            color: #333;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            position: relative;
+            background: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Main container */
+        .vc-container {
+            text-align: center;
+            min-height: 500px;
+            height: auto;
+            margin-bottom: 0;
+            position: relative;
+            overflow: visible;
+        }
+
+        /* Tape elements */
+        .vc-tape-wrapper {
+            -webkit-perspective: 800px;	
+            -moz-perspective: 800px;
+            -o-perspective: 800px;
+            -ms-perspective: 800px;
+            perspective: 800px;
+        }
+        .vc-tape {
+            width: 586px;
+            height: 379px;
+            margin: 30px auto 0;
+            position: relative;
+            -webkit-transition: all .4s ease-in-out;	
+            -moz-transition: all .4s ease-in-out;
+            -o-transition: all .4s ease-in-out;
+            -ms-transition: all .4s ease-in-out;
+            transition: all .4s ease-in-out;
+        }
+        .vc-loader {
+            position: absolute;
+            width: 31px;
+            height: 31px;
+            bottom: 50px;
+            left: 50%;
+            margin: -15px 0 0 -15px;
+            background: transparent url(images/ajax-loader.gif) no-repeat center center;
+            display: none;
+        }
+        .vc-tape-back {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: transparent url(images/cs_back.png) no-repeat center center;
+        }
+        .vc-tape-wheel {
+            width: 125px;
+            height: 125px;
+            position: absolute;
+            top: 110px;
+            background: transparent;
+            border-radius: 50%;
+        }
+        .vc-tape-wheel-left {
+            left: 109px;
+            box-shadow: 0 0 0 70px #000;
+        }
+        .vc-tape-wheel-right {
+            right: 113px;
+        }
+        @-webkit-keyframes rotateLeft {
+            0% { -webkit-transform: rotate(0deg) translateZ(-1px); }
+            100% { -webkit-transform: rotate(-360deg) translateZ(-1px); }
+        }
+        @-webkit-keyframes rotateRight {
+            0% { -webkit-transform: rotate(0deg) translateZ(-1px); }
+            100% { -webkit-transform: rotate(360deg) translateZ(-1px); }
+        }
+        @-moz-keyframes rotateLeft {
+            0% { -moz-transform: rotate(0deg) translateZ(-1px); }
+            100% { -moz-transform: rotate(-360deg) translateZ(-1px); }
+        }
+        @-moz-keyframes rotateRight {
+            0% { -moz-transform: rotate(0deg) translateZ(-1px); }
+            100% { -moz-transform: rotate(360deg) translateZ(-1px); }
+        }
+        @-o-keyframes rotateLeft {
+            0% { -o-transform: rotate(0deg) translateZ(-1px); }
+            100% { -o-transform: rotate(-360deg) translateZ(-1px); }
+        }
+        @-o-keyframes rotateRight {
+            0% { -o-transform: rotate(0deg) translateZ(-1px); }
+            100% { -o-transform: rotate(360deg) translateZ(-1px); }
+        }
+        @-ms-keyframes rotateLeft {
+            0% { -ms-transform: rotate(0deg) translateZ(-1px); }
+            100% { -ms-transform: rotate(-360deg) translateZ(-1px); }
+        }
+        @-ms-keyframes rotateRight {
+            0% { -ms-transform: rotate(0deg) translateZ(-1px); }
+            100% { -ms-transform: rotate(360deg) translateZ(-1px); }
+        }
+        @keyframes rotateLeft {
+            0% { transform: rotate(0deg) translateZ(-1px); }
+            100% { transform: rotate(-360deg) translateZ(-1px); }
+        }
+        @keyframes rotateRight {
+            0% { transform: rotate(0deg) translateZ(-1px); }
+            100% { transform: rotate(360deg) translateZ(-1px); }
+        }
+        .vc-tape-wheel div {
+            width: 100%;
+            height: 100%;
+            background: transparent url(images/cs_wheel.png) no-repeat center center;
+        }
+        .vc-tape-front {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background: transparent url(images/cs_front.png) no-repeat center center;
+            top: 0px;
+            left: 0px;
+        }
+        .vc-tape-side-b {
+            display: none;
+            -webkit-transform: rotate3d(0, 1, 0, 180deg);
+            -moz-transform: rotate3d(0, 1, 0, 180deg);
+            -o-transform: rotate3d(0, 1, 0, 180deg);
+            -ms-transform: rotate3d(0, 1, 0, 180deg);
+            transform: rotate3d(0, 1, 0, 180deg);
+        }
+        .vc-tape-front span {
+            color: rgba(0, 0, 0, 0.6);
+            position: absolute;
+            top: 83px;
+            left: 67px;
+            font-family: Arial;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        /* Controls list */
+        ul.vc-controls {
+            list-style: none;
+            padding: 0;
+            width: 440px;
+            position: absolute;
+            bottom: 18px;
+            left: 50%;
+            margin: 0 0 0 -170px;
+            background: transparent;
+            border: none;
+            padding: 8px;
+            height: 54px;
+            box-shadow: none;
+            -webkit-box-sizing: content-box;
+            -moz-box-sizing: content-box;
+            box-sizing: content-box;
+            border-radius: 0;
+        }
+
+        /* Controls list items */
+        ul.vc-controls li {
+            display: block;
+            float: left;
+            width: 80px;
+            height: 50px;
+            line-height: 55px;
+            text-align: left;
+            padding: 10px;
+            margin: 0;
+            cursor: pointer;
+            background: #ddd url(images/metal.jpg) no-repeat center top;
+            box-shadow: 
+                inset 0 0 0 1px rgba(0,0,0, 0.2), 
+                inset 0 0 1px 2px rgba(255,255,255,0.9),
+                inset 0 -6px 5px rgba(0,0,0,0.1),
+                0 6px 7px rgba(0,0,0,0.3),
+                0 4px 1px rgba(0,0,0,0.5);
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        ul.vc-controls li:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+        ul.vc-controls li:last-child {
+            border-radius: 0px 8px 8px 0px;
+        }
+        ul.vc-controls li.vc-control-play {
+            width: 120px;
+        }
+
+        /* Control icons */
+        ul.vc-controls li span:before {
+            font-size: 16px;
+            line-height: 50px;
+            text-align: center;
+            float: left;
+            color: #444;
+            font-family: 'playericons';
+            text-shadow:  1px 1px 1px rgba(255,255,255,0.9);
+            font-style: normal;
+            font-weight: normal;
+            text-transform: none;
+            speak: none;
+            display: inline-block;
+            text-decoration: inherit;
+            width: 1em;
+            margin-right: 0.2em;
+            text-align: center;
+        }
+        li.vc-control-pause span:before { content: '\50'; } 
+        li.vc-control-fforward span:before { content: '\23e9'; } 
+        li.vc-control-rewind span:before { content: '\23ea'; } 
+        li.vc-control-stop span:before { content: '\25aa'; } 
+        li.vc-control-play span:before { content: '\70'; } 
+
+        ul.vc-controls li:hover {
+            box-shadow: 
+                inset 0 0 0 1px rgba(0,0,0, 0.2), 
+                inset 0 0 1px 2px rgba(255,255,255,0.9),
+                inset 0 -10px 15px rgba(0,0,0,0.1),
+                0 6px 7px rgba(0,0,0,0.3),
+                0 4px 1px rgba(0,0,0,0.5);
+        }
+
+        /* Pressed (active) */
+        ul.vc-controls li.vc-control-active {
+            height: 50px;
+            margin-top: 2px;
+            background-image: url(images/metal_dark.jpg);
+            box-shadow: 
+                inset 0 0 0 1px rgba(0,0,0, 0.18), 
+                inset 0 0 1px 2px rgba(255,255,255,0.5),
+                inset 0 -6px 5px rgba(0,0,0,0.1),
+                0 6px 7px rgba(0,0,0,0.3),
+                0 2px 1px rgba(0,0,0,0.5);
+        }
+
+        /* Activated */
+        ul.vc-controls li.vc-control-pressed,
+        ul.vc-controls li.vc-control-active.vc-control-pressed {
+            height: 50px;
+            background-image: url(images/metal_dark.jpg);
+            margin-top: 4px;
+            box-shadow: 
+                inset 0 0 0 1px rgba(0,0,0, 0.2), 
+                inset 0 0 5px 1px rgba(255,255,255,0.5),
+                inset 0 -10px 15px rgba(0,0,0,0.2),
+                0 7px 5px rgba(255,255,255,0.5);
+        }
+
+        /* Volume knob */
+        .vc-volume-wrap {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            bottom: 0px;
+            left: 50%;
+            margin-left: -318px;
+            background: transparent;
+            border: none;
+            border-radius: 50%;
+            padding: 8px;
+            box-shadow: none;
+            -webkit-box-sizing: content-box;
+            -moz-box-sizing: content-box;
+            box-sizing: content-box;
+        }
+        .vc-volume-wrap:after {
+            content: 'Volume';
+            margin-top: 15px;
+            display: block;
+        }
+
+        /* Text style for controls */
+        ul.vc-controls li,
+        .vc-volume-wrap:after {
+            font-family: 'Aldrich';
+            font-size: 10px;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.8);
+        }
+
+        /* KnobKnob Styles */
+        .knob {
+            width: 100px;
+            height: 100px;
+            position: relative;
+        }
+        .knob .top {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url(images/knob.jpg) no-repeat center center;
+            z-index: 10;
+            cursor: default !important;
+            border-radius: 50%;
+            box-shadow: inset 0 0 3px 2px rgba(255,255,255,0.6);
+        }
+        .knob .base {
+            width: 100%;
+            height: 100%;
+            box-shadow: 0 5px 0 #555, 0px 5px 5px black;
+            position: absolute;
+            z-index: 1;
+            border-radius: 50%;
+        }
+        .knob .top:after {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background-color: #666;
+            position: absolute;
+            top: 50%;
+            margin-top: -2px;
+            left: 4px;
+            border-radius: 50%;
+            cursor: default !important;
+            box-shadow:  
+                0 0 1px #5a5a5a inset, 
+                1px -1px 1px rgba(255,255,255,0.5);
+        }
+        .knob [draggable] {
+            -moz-user-select:  none;
+            -webkit-user-select:  none;
+            user-select:  none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="vc-container" class="vc-container">
+            <div class="vc-tape-wrapper">
+                <div class="vc-tape">
+                    <div class="vc-tape-back">
+                        <div class="vc-tape-wheel vc-tape-wheel-left"><div></div></div>
+                        <div class="vc-tape-wheel vc-tape-wheel-right"><div></div></div>
+                    </div>
+                    <div class="vc-tape-front vc-tape-side-a">
+                        <span>A</span>
+                    </div>
+                    <div class="vc-tape-front vc-tape-side-b">
+                        <span>B</span>
+                    </div>
+                </div>
+            </div>
+            <div class="vc-loader"></div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script>
+        /* transform.js - jQuery CSS transform hooks */
+        (function( $ ) {
+            var div = document.createElement('div'),
+                divStyle = div.style,
+                propertyName = 'transform',
+                suffix = 'Transform',
+                testProperties = [
+                    'O' + suffix,
+                    'ms' + suffix,
+                    'Webkit' + suffix,
+                    'Moz' + suffix,
+                    propertyName
+                ],
+                i = testProperties.length,
+                supportProperty,
+                supportMatrixFilter,
+                propertyHook,
+                propertyGet,
+                rMatrix = /Matrix([^)]*)/;
+
+            while ( i-- ) {
+                if ( testProperties[i] in divStyle ) {
+                    $.support[propertyName] = supportProperty = testProperties[i];
+                    continue;
+                }
+            }
+            if ( !supportProperty ) {
+                $.support.matrixFilter = supportMatrixFilter = divStyle.filter === '';
+            }
+            div = divStyle = null;
+
+            $.cssNumber[propertyName] = true;
+
+            if ( supportProperty && supportProperty != propertyName ) {
+                $.cssProps[propertyName] = supportProperty;
+                if ( supportProperty == 'Moz' + suffix ) {
+                    propertyHook = {
+                        get: function( elem, computed ) {
+                            return (computed ?
+                                $.css( elem, supportProperty ).split('px').join(''):
+                                elem.style[supportProperty]
+                            )
+                        },
+                        set: function( elem, value ) {
+                            elem.style[supportProperty] = /matrix[^)p]*\)/.test(value) ?
+                                value.replace(/matrix((?:[^,]*,){4})([^,]*),([^)]*)/, 'matrix$1$2px,$3px'):
+                                value;
+                        }
+                    }
+                } else if ( /^1\.[0-5](?:\.|$)/.test($.fn.jquery) ) {
+                    propertyHook = {
+                        get: function( elem, computed ) {
+                            return (computed ?
+                                $.css( elem, supportProperty.replace(/^ms/, 'Ms') ):
+                                elem.style[supportProperty]
+                            )
+                        }
+                    }
+                }
+            } else if ( supportMatrixFilter ) {
+                propertyHook = {
+                    get: function( elem, computed ) {
+                        var elemStyle = ( computed && elem.currentStyle ? elem.currentStyle : elem.style ),
+                            matrix;
+                        if ( elemStyle && rMatrix.test( elemStyle.filter ) ) {
+                            matrix = RegExp.$1.split(',');
+                            matrix = [
+                                matrix[0].split('=')[1],
+                                matrix[2].split('=')[1],
+                                matrix[1].split('=')[1],
+                                matrix[3].split('=')[1]
+                            ];
+                        } else {
+                            matrix = [1,0,0,1];
+                        }
+                        matrix[4] = elemStyle ? elemStyle.left : 0;
+                        matrix[5] = elemStyle ? elemStyle.top : 0;
+                        return "matrix(" + matrix + ")";
+                    },
+                    set: function( elem, value, animate ) {
+                        var elemStyle = elem.style,
+                            currentStyle,
+                            Matrix,
+                            filter;
+                        if ( !animate ) {
+                            elemStyle.zoom = 1;
+                        }
+                        value = matrix(value);
+                        if ( !animate || animate.M ) {
+                            Matrix = [
+                                "Matrix("+
+                                    "M11="+value[0],
+                                    "M12="+value[2],
+                                    "M21="+value[1],
+                                    "M22="+value[3],
+                                    "SizingMethod='auto expand'"
+                            ].join();
+                            filter = ( currentStyle = elem.currentStyle ) && currentStyle.filter || elemStyle.filter || "";
+                            elemStyle.filter = rMatrix.test(filter) ?
+                                filter.replace(rMatrix, Matrix) :
+                                filter + " progid:DXImageTransform.Microsoft." + Matrix + ")";
+                            if ( (centerOrigin = $.transform.centerOrigin) ) {
+                                elemStyle[centerOrigin == 'margin' ? 'marginLeft' : 'left'] = -(elem.offsetWidth/2) + (elem.clientWidth/2) + 'px';
+                                elemStyle[centerOrigin == 'margin' ? 'marginTop' : 'top'] = -(elem.offsetHeight/2) + (elem.clientHeight/2) + 'px';
+                            }
+                        }
+                        if ( !animate || animate.T ) {
+                            elemStyle.left = value[4] + 'px';
+                            elemStyle.top = value[5] + 'px';
+                        }
+                    }
+                }
+            }
+            if ( propertyHook ) {
+                $.cssHooks[propertyName] = propertyHook;
+            }
+            propertyGet = propertyHook && propertyHook.get || $.css;
+
+            $.fx.step.transform = function( fx ) {
+                var elem = fx.elem,
+                    start = fx.start,
+                    end = fx.end,
+                    split,
+                    pos = fx.pos,
+                    transform,
+                    translate,
+                    rotate,
+                    scale,
+                    skew,
+                    T = false,
+                    M = false,
+                    prop;
+                translate = rotate = scale = skew = '';
+                if ( !start || typeof start === "string" ) {
+                    if (!start) {
+                        start = propertyGet( elem, supportProperty );
+                    }
+                    if ( supportMatrixFilter ) {
+                        elem.style.zoom = 1;
+                    }
+                    split = end.split(start);
+                    if ( split.length == 2 ) {
+                        end = split.join('');
+                        fx.origin = start;
+                        start = 'none';
+                    }
+                    fx.start = start = start == 'none'?
+                        {
+                            translate: [0,0],
+                            rotate: 0,
+                            scale: [1,1],
+                            skew: [0,0]
+                        }:
+                        unmatrix( toArray(start) );
+                    fx.end = end = ~end.indexOf('matrix')?
+                        unmatrix(matrix(end)):
+                        components(end);
+                    for ( prop in start) {
+                        if ( prop == 'rotate' ?
+                            start[prop] == end[prop]:
+                            start[prop][0] == end[prop][0] && start[prop][1] == end[prop][1]
+                        ) {
+                            delete start[prop];
+                        }
+                    }
+                }
+                if ( start.translate ) {
+                    translate = ' translate('+
+                        ((start.translate[0] + (end.translate[0] - start.translate[0]) * pos + .5) | 0) +'px,'+
+                        ((start.translate[1] + (end.translate[1] - start.translate[1]) * pos + .5) | 0) +'px'+
+                    ')';
+                    T = true;
+                }
+                if ( start.rotate != undefined ) {
+                    rotate = ' rotate('+ (start.rotate + (end.rotate - start.rotate) * pos) +'rad)';
+                    M = true;
+                }
+                if ( start.scale ) {
+                    scale = ' scale('+
+                        (start.scale[0] + (end.scale[0] - start.scale[0]) * pos) +','+
+                        (start.scale[1] + (end.scale[1] - start.scale[1]) * pos) +
+                    ')';
+                    M = true;
+                }
+                if ( start.skew ) {
+                    skew = ' skew('+
+                        (start.skew[0] + (end.skew[0] - start.skew[0]) * pos) +'rad,'+
+                        (start.skew[1] + (end.skew[1] - start.skew[1]) * pos) +'rad'+
+                    ')';
+                    M = true;
+                }
+                transform = fx.origin ?
+                    fx.origin + translate + skew + scale + rotate:
+                    translate + rotate + scale + skew;
+                propertyHook && propertyHook.set ?
+                    propertyHook.set( elem, transform, {M: M, T: T} ):
+                    elem.style[supportProperty] = transform;
+            };
+
+            function matrix( transform ) {
+                transform = transform.split(')');
+                var trim = $.trim,
+                    i = transform.length -1,
+                    split, prop, val,
+                    A = 1, B = 0, C = 0, D = 1, A_, B_, C_, D_,
+                    tmp1, tmp2,
+                    X = 0, Y = 0;
+                while (i--) {
+                    split = transform[i].split('(');
+                    prop = trim(split[0]);
+                    val = split[1];
+                    A_ = B_ = C_ = D_ = 0;
+                    switch (prop) {
+                        case 'translateX':
+                            X += parseInt(val, 10);
+                            continue;
+                        case 'translateY':
+                            Y += parseInt(val, 10);
+                            continue;
+                        case 'translate':
+                            val = val.split(',');
+                            X += parseInt(val[0], 10);
+                            Y += parseInt(val[1] || 0, 10);
+                            continue;
+                        case 'rotate':
+                            val = toRadian(val);
+                            A_ = Math.cos(val);
+                            B_ = Math.sin(val);
+                            C_ = -Math.sin(val);
+                            D_ = Math.cos(val);
+                            break;
+                        case 'scaleX':
+                            A_ = val;
+                            D_ = 1;
+                            break;
+                        case 'scaleY':
+                            A_ = 1;
+                            D_ = val;
+                            break;
+                        case 'scale':
+                            val = val.split(',');
+                            A_ = val[0];
+                            D_ = val.length>1 ? val[1] : val[0];
+                            break;
+                        case 'skewX':
+                            A_ = D_ = 1;
+                            C_ = Math.tan(toRadian(val));
+                            break;
+                        case 'skewY':
+                            A_ = D_ = 1;
+                            B_ = Math.tan(toRadian(val));
+                            break;
+                        case 'skew':
+                            A_ = D_ = 1;
+                            val = val.split(',');
+                            C_ = Math.tan(toRadian(val[0]));
+                            B_ = Math.tan(toRadian(val[1] || 0));
+                            break;
+                        case 'matrix':
+                            val = val.split(',');
+                            A_ = +val[0];
+                            B_ = +val[1];
+                            C_ = +val[2];
+                            D_ = +val[3];
+                            X += parseInt(val[4], 10);
+                            Y += parseInt(val[5], 10);
+                    }
+                    tmp1 = A * A_ + B * C_;
+                    B    = A * B_ + B * D_;
+                    tmp2 = C * A_ + D * C_;
+                    D    = C * B_ + D * D_;
+                    A = tmp1;
+                    C = tmp2;
+                }
+                return [A,B,C,D,X,Y];
+            }
+
+            function unmatrix(matrix) {
+                var scaleX, scaleY, skew,
+                    A = matrix[0], B = matrix[1], C = matrix[2], D = matrix[3];
+                if ( A * D - B * C ) {
+                    scaleX = Math.sqrt( A * A + B * B );
+                    A /= scaleX;
+                    B /= scaleX;
+                    skew = A * C + B * D;
+                    C -= A * skew;
+                    D -= B * skew;
+                    scaleY = Math.sqrt( C * C + D * D );
+                    C /= scaleY;
+                    D /= scaleY;
+                    skew /= scaleY;
+                    if ( A * D < B * C ) {
+                        A = -A;
+                        B = -B;
+                        skew = -skew;
+                        scaleX = -scaleX;
+                    }
+                } else {
+                    rotate = scaleX = scaleY = skew = 0;
+                }
+                return {
+                    translate: [+matrix[4], +matrix[5]],
+                    rotate: Math.atan2(B, A),
+                    scale: [scaleX, scaleY],
+                    skew: [skew, 0]
+                }
+            }
+
+            function components( transform ) {
+                transform = transform.split(')');
+                var translate = [0,0], rotate = 0, scale = [1,1], skew = [0,0],
+                    i = transform.length -1, trim = $.trim, split, name, value;
+                while ( i-- ) {
+                    split = transform[i].split('(');
+                    name = trim(split[0]);
+                    value = split[1];
+                    if (name == 'translateX') {
+                        translate[0] += parseInt(value, 10);
+                    } else if (name == 'translateY') {
+                        translate[1] += parseInt(value, 10);
+                    } else if (name == 'translate') {
+                        value = value.split(',');
+                        translate[0] += parseInt(value[0], 10);
+                        translate[1] += parseInt(value[1] || 0, 10);
+                    } else if (name == 'rotate') {
+                        rotate += toRadian(value);
+                    } else if (name == 'scaleX') {
+                        scale[0] *= value;
+                    } else if (name == 'scaleY') {
+                        scale[1] *= value;
+                    } else if (name == 'scale') {
+                        value = value.split(',');
+                        scale[0] *= value[0];
+                        scale[1] *= (value.length>1? value[1] : value[0]);
+                    } else if (name == 'skewX') {
+                        skew[0] += toRadian(value);
+                    } else if (name == 'skewY') {
+                        skew[1] += toRadian(value);
+                    } else if (name == 'skew') {
+                        value = value.split(',');
+                        skew[0] += toRadian(value[0]);
+                        skew[1] += toRadian(value[1] || '0');
+                    }
+                }
+                return {
+                    translate: translate,
+                    rotate: rotate,
+                    scale: scale,
+                    skew: skew
+                };
+            }
+
+            function toRadian(value) {
+                return ~value.indexOf('deg') ?
+                    parseInt(value,10) * (Math.PI * 2 / 360):
+                    ~value.indexOf('grad') ?
+                        parseInt(value,10) * (Math.PI/200):
+                        parseFloat(value);
+            }
+
+            function toArray(matrix) {
+                matrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/.exec(matrix);
+                return [matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6]];
+            }
+
+            $.transform = {
+                centerOrigin: 'margin'
+            };
+        })( jQuery );
+    </script>
+    <script>
+        /* knobKnob.jquery.js */
+        (function($){
+            $.fn.knobKnob = function(props){
+                var options = $.extend({
+                    snap: 0,
+                    value: 0,
+                    turn: function(){}
+                }, props || {});
+                var tpl = '<div class="knob"><div class="top"></div><div class="base"></div></div>';
+                return this.each(function(){
+                    var el = $(this);
+                    el.append(tpl);
+                    var knob = $('.knob',el),
+                        knobTop = knob.find('.top'),
+                        startDeg = -1,
+                        currentDeg = 0,
+                        rotation = 0,
+                        lastDeg = 0,
+                        doc = $(document);
+                    if(options.value > 0 && options.value <= 359){
+                        rotation = lastDeg = currentDeg = options.value;
+                        knobTop.css('transform','rotate('+(currentDeg)+'deg)');
+                        options.turn(currentDeg/359);
+                    }
+                    knob.on('mousedown touchstart', function(e){
+                        e.preventDefault();
+                        var offset = knob.offset();
+                        var center = {
+                            y : offset.top + knob.height()/2,
+                            x: offset.left + knob.width()/2
+                        };
+                        var a, b, deg, tmp, rad2deg = 180/Math.PI;
+                        knob.on('mousemove.rem touchmove.rem',function(e){
+                            e = (e.originalEvent.touches) ? e.originalEvent.touches[0] : e;
+                            a = center.y - e.pageY;
+                            b = center.x - e.pageX;
+                            deg = Math.atan2(a,b)*rad2deg;
+                            if(deg<0){
+                                deg = 360 + deg;
+                            }
+                            if(startDeg == -1){
+                                startDeg = deg;
+                            }
+                            tmp = Math.floor((deg-startDeg) + rotation);
+                            if(tmp < 0){
+                                tmp = 360 + tmp;
+                            }
+                            else if(tmp > 359){
+                                tmp = tmp % 360;
+                            }
+                            if(options.snap && tmp < options.snap){
+                                tmp = 0;
+                            }
+                            if(Math.abs(tmp - lastDeg) > 180){
+                                return false;
+                            }
+                            currentDeg = tmp;
+                            lastDeg = tmp;
+                            knobTop.css('transform','rotate('+(currentDeg)+'deg)');
+                            options.turn(currentDeg/360);
+                        });
+                        doc.on('mouseup.rem  touchend.rem',function(){
+                            knob.off('.rem');
+                            doc.off('.rem');
+                            rotation = currentDeg;
+                            startDeg = -1;
+                        });
+                    });
+                });
+            };
+        })(jQuery);
+    </script>
+    <script>
+        /* jquery.cassette.js - Modified for single song */
+        ( function( window, $, undefined ) {
+            var aux = {
+                getSupportedType: function() {
+                    var audio = document.createElement( 'audio' );
+                    if ( audio.canPlayType('audio/mpeg;') ) {
+                        return 'mp3';
+                    }
+                    else if ( audio.canPlayType('audio/ogg;') ) {
+                        return 'ogg';
+                    }
+                    else {
+                        return 'wav';
+                    }
+                }
+            };
+            
+            $.Cassette = function( options, element ) {
+                this.$el = $( element );
+                this._init( options );
+            };
+            
+            $.Cassette.defaults = {
+                songs: [ 'deceptacon' ],
+                fallbackMessage: 'HTML5 audio not supported',
+                initialVolume: 0.7
+            };
+            
+            $.Cassette.prototype = {
+                _init: function( options ) {
+                    var _self = this;
+                    this.options = $.extend( true, {}, $.Cassette.defaults, options );
+                    this.currentSide = 1;
+                    this.cntTime = 0;
+                    this.timeIterator = 0;
+                    this.elapsed = 0.0;
+                    this.lastaction = '';
+                    this.isMoving = false;
+                    this.$loader = this.$el.find( 'div.vc-loader' ).show();
+                    $.when( this._createSides() ).done( function() {
+                        _self.$loader.hide();
+                        _self._createPlayer();
+                        _self.sound = new $.Sound();
+                        _self._loadEvents();
+                    } );
+                },
+                _getSide: function() {
+                    return ( this.currentSide === 1 ) ? {
+                        current : this.side1,
+                        reverse : this.side2	
+                    } : {
+                        current : this.side2,
+                        reverse : this.side1	
+                    };
+                },
+                _createSides: function() {
+                    var playlistSide1 = [], playlistSide2 = [],
+                        _self = this, cnt = 0;
+                    return $.Deferred( function( dfd ) {
+                        for( var i = 0, len = _self.options.songs.length; i < len; ++i ) {
+                            var song = new $.Song( _self.options.songs[i], i );
+                            $.when( song.loadMetadata() ).done( function( song ) {
+                                ( song.id < len / 2 ) ? playlistSide1.push( song ) : playlistSide2.push( song );
+                                ++cnt;
+                                if( cnt === len ) {
+                                    _self.side1 = new $.Side( 'side1', playlistSide1, 'start' ),
+                                    _self.side2 = new $.Side( 'side2', playlistSide2, 'end' );
+                                    dfd.resolve();
+                                }
+                            } );
+                        }
+                    } ).promise();
+                },
+                _createPlayer: function() {
+                    this.$audioEl = $( '<audio id="audioElem"><span>' + this.options.fallbackMessage + '</span></audio>' );
+                    this.$el.prepend( this.$audioEl );
+                    this.audio = this.$audioEl.get(0);
+                    this._createControls();
+                    this.$theTape = this.$el.find( 'div.vc-tape' );
+                    this.$wheelLeft = this.$theTape.find( 'div.vc-tape-wheel-left' );
+                    this.$wheelRight = this.$theTape.find( 'div.vc-tape-wheel-right' );
+                    this.$tapeSideA = this.$theTape.find( 'div.vc-tape-side-a' ).show();
+                    this.$tapeSideB = this.$theTape.find( 'div.vc-tape-side-b' );
+                },
+                _createControls: function() {
+                    var _self = this;
+                    this.$controls = $( '<ul class="vc-controls" style="display:none;"/>' );
+                    this.$cPlay = $( '<li class="vc-control-play">Play<span></span></li>' );
+                    this.$cRewind = $( '<li class="vc-control-rewind">Rew<span></span></li>' );
+                    this.$cForward = $( '<li class="vc-control-fforward">FF<span></span></li>' );
+                    this.$cStop = $( '<li class="vc-control-stop">Stop<span></span></li>' );
+                    this.$cSwitch = $( '<li class="vc-control-switch">Switch<span></span></li>' );
+                    this.$controls.append( this.$cPlay )
+                                  .append( this.$cRewind )
+                                  .append( this.$cForward )
+                                  .append( this.$cStop )
+                                  .append( this.$cSwitch )
+                                  .appendTo( this.$el );
+                    this.$volume = $( '<div style="display:none;" class="vc-volume-wrap"><div class="vc-volume-control"><div class="vc-volume-knob"></div></div></div> ').appendTo( this.$el );
+                    if (document.createElement('audio').canPlayType) {
+                        if (!document.createElement('audio').canPlayType('audio/mpeg') && !document.createElement('audio').canPlayType('audio/ogg')) {
+                        } else {
+                            this.$controls.show();
+                            this.$volume.show();
+                            this.$volume.find( 'div.vc-volume-knob' ).knobKnob({
+                                snap : 10,
+                                value: 359 * this.options.initialVolume,
+                                turn : function( ratio ) {
+                                    _self._changeVolume( ratio );
+                                }
+                            });
+                            this.audio.volume = this.options.initialVolume;
+                        }
+                    }
+                },
+                _loadEvents: function() {
+                    var _self = this;
+                    this.$cSwitch.on( 'mousedown', function( event ) {
+                        _self._setButtonActive( $( this ) );
+                        _self._switchSides();
+                    } );
+                    this.$cPlay.on( 'mousedown', function( event ) {
+                        _self._setButtonActive( $( this ) );
+                        _self._play();
+                    } );
+                    this.$cStop.on( 'mousedown', function( event ) {
+                        _self._setButtonActive( $( this ) );
+                        _self._stop();
+                    } );
+                    this.$cForward.on( 'mousedown', function( event ) {
+                        _self._setButtonActive( $( this ) );
+                        _self._forward();
+                    } );
+                    this.$cRewind.on( 'mousedown', function( event ) {
+                        _self._setButtonActive( $( this ) );				
+                        _self._rewind();
+                    } );
+                    this.$audioEl.on( 'timeupdate', function( event ) {
+                        _self.cntTime = _self.timeIterator + _self.audio.currentTime;
+                        var wheelVal = _self._getWheelValues( _self.cntTime );
+                        _self._updateWheelValue( wheelVal );
+                    });
+                    this.$audioEl.on( 'loadedmetadata', function( event ) {
+                    });
+                    this.$audioEl.on( 'ended', function( event ) {
+                        _self.timeIterator += _self.audio.duration;
+                        _self._play();
+                    } );
+                },
+                _setButtonActive: function( $button ) {
+                    $button.addClass( 'vc-control-pressed' );
+                    setTimeout( function() {
+                        $button.removeClass( 'vc-control-pressed' );	
+                    }, 100 );
+                },	
+                _updateAction: function( action ) {
+                    this.lastaction = action;
+                },
+                _prepare: function( song ) {
+                    this._clear();
+                    this.$audioEl.attr( 'src', song.getSource( aux.getSupportedType() ) );
+                },
+                _switchSides: function() {
+                    if( this.isMoving ) {
+                        alert( 'Please stop the player before switching sides.' );
+                        return false;
+                    }
+                    this.sound.play( 'switch' );
+                    var _self = this;
+                    this.lastaction = '';
+                    if( this.currentSide === 1 ) {
+                        this.currentSide = 2;
+                        this.$theTape.css( {
+                            '-webkit-transform'	: 'rotate3d(0, 1, 0, 180deg)',
+                            '-moz-transform'	: 'rotate3d(0, 1, 0, 180deg)',
+                            '-o-transform'		: 'rotate3d(0, 1, 0, 180deg)',
+                            '-ms-transform'		: 'rotate3d(0, 1, 0, 180deg)',
+                            'transform'			: 'rotate3d(0, 1, 0, 180deg)'
+                        } );
+                        setTimeout( function() {
+                            _self.$tapeSideA.hide();
+                            _self.$tapeSideB.show();
+                            _self.cntTime = _self._getPosTime();
+                        }, 200 );
+                    } else {
+                        this.currentSide = 1;
+                        this.$theTape.css( {
+                            '-webkit-transform'	: 'rotate3d(0, 1, 0, 0deg)',
+                            '-moz-transform'	: 'rotate3d(0, 1, 0, 0deg)',
+                            '-o-transform'		: 'rotate3d(0, 1, 0, 0deg)',
+                            '-ms-transform'		: 'rotate3d(0, 1, 0, 0deg)',
+                            'transform'			: 'rotate3d(0, 1, 0, 0deg)'
+                        } );
+                        setTimeout( function() {
+                            _self.$tapeSideB.hide();
+                            _self.$tapeSideA.show();
+                            _self.cntTime = _self._getPosTime();
+                        }, 200 );
+                    }
+                },
+                _updateButtons: function( button ) {
+                    var pressedClass = 'vc-control-active';
+                    this.$cPlay.removeClass( pressedClass );
+                    this.$cStop.removeClass( pressedClass );
+                    this.$cRewind.removeClass( pressedClass );
+                    this.$cForward.removeClass( pressedClass );
+                    switch( button ) {
+                        case 'play'		: this.$cPlay.addClass( pressedClass ); break;
+                        case 'rewind'	: this.$cRewind.addClass( pressedClass ); break;
+                        case 'forward'	: this.$cForward.addClass( pressedClass ); break;
+                    }
+                },
+                _changeVolume: function( ratio ) {
+                    this.audio.volume = ratio;
+                },
+                _play: function() {
+                    var _self = this;
+                    this._updateButtons( 'play' );
+                    $.when( this.sound.play( 'click' ) ).done( function() {
+                        var data = _self._updateStatus();
+                        if( data ) {
+                            _self._prepare( _self._getSide().current.getSong( data.songIdx ) );
+                            _self.$audioEl.on( 'canplay', function( event ) {
+                                $( this ).off( 'canplay' );
+                                _self.audio.currentTime = data.timeInSong;
+                                _self.audio.play();
+                                _self.isMoving = true;
+                                _self._setWheelAnimation( '2s', 'play' );
+                            });
+                        }
+                    } );
+                },
+                _updateStatus: function( buttons ) {
+                    var posTime = this.cntTime;
+                    this._stop( true );
+                    this._setSidesPosStatus( 'middle' );
+                    if( this.lastaction === 'forward' ) {
+                        posTime += this.elapsed;
+                    }
+                    else if( this.lastaction === 'rewind' ) {
+                        posTime -= this.elapsed;
+                    }
+                    if( posTime >= this._getSide().current.getDuration() ) {
+                        this._stop( buttons );
+                        this._setSidesPosStatus( 'end' );
+                        return false;
+                    }
+                    this._resetElapsed();
+                    var data = this._getSongInfoByTime( posTime );
+                    this.cntTime = posTime;
+                    this.timeIterator = data.iterator;
+                    return data;
+                },
+                _rewind: function() {
+                    var _self = this, action = 'rewind';
+                    if( this._getSide().current.getPositionStatus() === 'start' ) {
+                        return false;
+                    }
+                    this._updateButtons( action );
+                    $.when( this.sound.play( 'click' ) ).done( function() {
+                        _self._updateStatus( true );
+                        _self.isMoving = true;
+                        _self._updateAction( action );
+                        _self.sound.play( 'rewind', true );
+                        _self._setWheelAnimation( '0.5s', action );
+                        _self._timer();
+                    } );
+                },
+                _forward: function() {
+                    var _self = this, action = 'forward';
+                    if( this._getSide().current.getPositionStatus() === 'end' ) {
+                        return false;
+                    }
+                    this._updateButtons( action );
+                    $.when( this.sound.play( 'click' ) ).done( function() {
+                        _self._updateStatus( true );
+                        _self.isMoving = true;
+                        _self._updateAction( action );
+                        _self.sound.play( 'fforward', true );
+                        _self._setWheelAnimation( '0.5s', action );
+                        _self._timer();
+                    } );
+                },
+                _stop: function( buttons ) {
+                    if( !buttons ) { 
+                        this._updateButtons( 'stop' );
+                        this.sound.play( 'click' );
+                    }
+                    this.isMoving = false;
+                    this._stopWheels();
+                    this.audio.pause();
+                    this._stopTimer();
+                },
+                _clear: function() {
+                    this.$audioEl.children( 'source' ).remove();
+                },
+                _setSidesPosStatus: function( position ) {
+                    this._getSide().current.setPositionStatus( position );
+                    switch( position ) {
+                        case 'middle'	: this._getSide().reverse.setPositionStatus( position );break;
+                        case 'start'	: this._getSide().reverse.setPositionStatus( 'end' );break;
+                        case 'end'		: this._getSide().reverse.setPositionStatus( 'start' );break;
+                    }
+                },
+                _getSongInfoByTime: function( time ) {
+                    var data = { songIdx : 0, timeInSong : 0 },
+                        side = this._getSide().current,
+                        playlist = side.getPlaylist(),
+                        len = side.getPlaylistCount(),
+                        cntTime = 0;
+                    for( var i = 0; i < len; ++i ) {
+                        var song = playlist[ i ],
+                            duration = song.getDuration();
+                        cntTime += duration;
+                        if( cntTime > time ) {
+                            data.songIdx = i;
+                            data.timeInSong = time - ( cntTime - duration );
+                            data.iterator = cntTime - duration;
+                            return data;
+                        }
+                    }
+                    return data;
+                },
+                _getWheelValues: function( x ) {
+                    var T = this._getSide().current.getDuration(),
+                        val = {
+                            left	: ( this.currentSide === 1 ) ? ( -70 / T ) * x + 70 : ( 70 / T ) * x,
+                            right	: ( this.currentSide === 1 ) ?  ( 70 / T ) * x : ( -70 / T ) * x + 70
+                        };
+                    return val;
+                },
+                _getPosTime: function() {
+                    var wleft = this.$wheelLeft.data( 'wheel' ),
+                        wright = this.$wheelRight.data( 'wheel' );
+                    if( wleft === undefined ) {
+                        wleft = 70;
+                    }
+                    if( wright === undefined ) {
+                        wright = 0;
+                    }
+                    var T = this._getSide().current.getDuration(),
+                        posTime = this.currentSide === 2 ? ( T * wleft ) / 70 : ( T * wright ) / 70;
+                    return posTime;
+                },
+                _updateWheelValue: function( wheelVal ) {
+                    this.$wheelLeft.data( 'wheel', wheelVal.left ).css( { 'box-shadow' : '0 0 0 ' + wheelVal.left + 'px black' } );
+                    this.$wheelRight.data( 'wheel', wheelVal.right ).css( { 'box-shadow' : '0 0 0 ' + wheelVal.right + 'px black' } );
+                },
+                _setWheelAnimation: function( speed, mode ) {
+                    var _self = this, anim = '';
+                    switch( this.currentSide ) {
+                        case 1 :
+                            if( mode === 'play' || mode === 'forward' ) {
+                                anim = 'rotateLeft';
+                            }
+                            else if( mode === 'rewind' ) {
+                                anim = 'rotateRight';
+                            }
+                            break;
+                        case 2 :
+                            if( mode === 'play' || mode === 'forward' ) {
+                                anim = 'rotateRight';
+                            }
+                            else if( mode === 'rewind' ) {
+                                anim = 'rotateLeft';
+                            }
+                            break;
+                    }
+                    var animStyle = { 
+                        '-webkit-animation'	: anim + ' ' + speed + ' linear infinite forwards',
+                        '-moz-animation'	: anim + ' ' + speed + ' linear infinite forwards',
+                        '-o-animation'		: anim + ' ' + speed + ' linear infinite forwards',
+                        '-ms-animation'		: anim + ' ' + speed + ' linear infinite forwards',
+                        'animation'			: anim + ' ' + speed + ' linear infinite forwards'
+                    };
+                    setTimeout( function() {
+                        _self.$wheelLeft.css(animStyle);
+                        _self.$wheelRight.css(animStyle);
+                    }, 0 );			
+                },
+                _stopWheels: function() {
+                    var wheelStyle = {
+                        '-webkit-animation'	: 'none',
+                        '-moz-animation'	: 'none',
+                        '-o-animation'		: 'none',
+                        '-ms-animation'		: 'none',
+                        'animation'			: 'none'
+                    }
+                    this.$wheelLeft.css( wheelStyle );
+                    this.$wheelRight.css( wheelStyle );
+                },
+                _timer: function() {
+                    var _self = this, start = new Date().getTime(), time = 0;
+                    this._resetElapsed();
+                    this.isSeeking = true;
+                    this._setSidesPosStatus( 'middle' );
+                    if( this.isSeeking ) {
+                        clearTimeout( this.timertimeout );
+                        this.timertimeout = setTimeout( function() {
+                            _self._timerinstance( start, time );
+                        }, 100 );
+                    }
+                },
+                _timerinstance: function( start, time ) {
+                    var _self = this;	
+                    time += 100;  
+                    this.elapsed = Math.floor(time / 20) / 10;  
+                    if( Math.round( this.elapsed ) == this.elapsed ) { 
+                        this.elapsed += 0.0;
+                    }  
+                    var posTime = this.cntTime;
+                    if( this.lastaction === 'forward' ) {
+                        posTime += this.elapsed;
+                    }
+                    else if( this.lastaction === 'rewind' ) {
+                        posTime -= this.elapsed;
+                    }
+                    var wheelVal = this._getWheelValues( posTime );
+                    this._updateWheelValue( wheelVal );
+                    if( posTime >= this._getSide().current.getDuration() || posTime <= 0 ) {
+                        this._stop();
+                        ( posTime <= 0) ? this.cntTime = 0 : this.cntTime = posTime;
+                        this._resetElapsed();
+                        ( posTime <= 0) ? this._setSidesPosStatus( 'start' ) : this._setSidesPosStatus( 'end' );
+                        return false;
+                    }
+                    var diff = (new Date().getTime() - start) - time;  
+                    if( this.isSeeking ) {
+                        clearTimeout( this.timertimeout );
+                        this.timertimeout = setTimeout( function() {
+                            _self._timerinstance( start, time );
+                        }, ( 100 - diff ) );
+                    }
+                },
+                _stopTimer: function() {
+                    clearTimeout( this.timertimeout );
+                    this.isSeeking = false;
+                },
+                _resetElapsed: function() {
+                    this.elapsed = 0.0;
+                }
+            };
+            
+            $.Side = function( id, playlist, status ) {
+                this.id = id;
+                this.status = status;
+                this.playlist = playlist.sort( function( a, b ) {
+                    var aid = a.id, bid = b.id;
+                    return ( ( aid < bid ) ? -1 : ( ( aid > bid ) ? 1 : 0 ) );
+                } );
+                this._setDuration();
+                this.playlistCount = playlist.length;
+            };
+            
+            $.Side.prototype = {
+                getSong: function( num ) {
+                    return this.playlist[ num ];
+                },
+                getPlaylist: function() {
+                    return this.playlist;
+                },
+                _setDuration: function() {
+                    this.duration = 0;
+                    for( var i = 0, len = this.playlist.length; i < len; ++i ) {
+                        this.duration += this.playlist[ i ].duration;
+                    }
+                },
+                getDuration: function() {
+                    return this.duration;
+                },
+                getPlaylistCount: function() {
+                    return this.playlistCount;
+                },
+                setPositionStatus: function( status ) {
+                    this.status = status;
+                },
+                getPositionStatus: function() {
+                    return this.status;
+                }
+            };
+            
+            $.Song = function( name, id ) {
+                this.id = id;
+                this.name = name;
+                this._init();
+            };
+            
+            $.Song.prototype = {
+                _init: function() {
+                    this.sources = {
+                        mp3	: 'songs/' + this.name + '.mp3',
+                        ogg	: 'songs/' + this.name + '.ogg'
+                    };
+                },
+                getSource: function( type ) {
+                    return this.sources[type];
+                },
+                loadMetadata: function() {
+                    var _self = this;
+                    return $.Deferred( function( dfd ) {
+                        var $tmpAudio = $( '<audio/>' ),
+                            songsrc = _self.getSource( aux.getSupportedType() );
+                        $tmpAudio.attr( 'preload', 'auto' );
+                        $tmpAudio.attr( 'src', songsrc );
+                        $tmpAudio.on( 'loadedmetadata', function( event ) {
+                            _self.duration = $tmpAudio.get(0).duration;
+                            dfd.resolve( _self );
+                        });
+                    } ).promise();
+                },
+                getDuration: function() {
+                    return this.duration;
+                }
+            };
+            
+            $.Sound = function() {
+                this._init();
+            };
+            
+            $.Sound.prototype = {
+                _init: function() {
+                    this.$audio = $( '<audio/>' ).attr( 'preload', 'auto' );
+                },
+                getSource: function( type ) {
+                    return 'sounds/' + this.action + '.' + type;
+                },
+                play: function( action, loop ) {
+                    var _self = this;
+                    return $.Deferred( function( dfd ) {
+                        _self.action = action;
+                        var soundsrc = _self.getSource( aux.getSupportedType() );
+                        _self.$audio.attr( 'src', soundsrc );
+                        if( loop ) {
+                            _self.$audio.attr( 'loop', loop );
+                        }
+                        else {
+                            _self.$audio.removeAttr( 'loop' );
+                        }
+                        _self.$audio.on( 'canplay', function( event ) {
+                            setTimeout( function() {
+                                dfd.resolve();
+                            }, 500 );
+                            $( this ).get(0).play();
+                        });
+                    });
+                }
+            };
+            
+            var logError = function( message ) {
+                if ( window.console ) {
+                    window.console.error( message );
+                }
+            };
+            
+            $.fn.cassette = function( options ) {
+                if ( typeof options === 'string' ) {
+                    var args = Array.prototype.slice.call( arguments, 1 );
+                    this.each(function() {
+                        var instance = $.data( this, 'cassette' );
+                        if ( !instance ) {
+                            logError( "cannot call methods on cassette prior to initialization; " +
+                            "attempted to call method '" + options + "'" );
+                            return;
+                        }
+                        if ( !$.isFunction( instance[options] ) || options.charAt(0) === "_" ) {
+                            logError( "no such method '" + options + "' for cassette instance" );
+                            return;
+                        }
+                        instance[ options ].apply( instance, args );
+                    });
+                } else {
+                    this.each(function() {
+                        var instance = $.data( this, 'cassette' );
+                        if ( !instance ) {
+                            $.data( this, 'cassette', new $.Cassette( options, this ) );
+                        }
+                    });
+                }
+                return this;
+            };
+        } )( window, jQuery );
+    </script>
+    <script>
+        $(function() {
+            $( '#vc-container' ).cassette();
+        });
+    </script>
+</body>
+</html>
+
