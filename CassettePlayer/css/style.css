@@ -301,3 +301,18 @@ ul.vc-controls li,
     animation: none !important;
   }
 }
+/* Keep wheel containers responsive even if JS adds inline styles */
+.vc-tape .vc-tape-wheel {
+  width: 21.32% !important;
+  aspect-ratio: 1 / 1 !important;
+  height: auto !important;
+}
+
+/* Inner sprite fills the container and is the only element that rotates */
+.vc-tape .vc-tape-wheel > div {
+  width: 100% !important;
+  height: 100% !important;
+  background-size: 100% 100% !important;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
