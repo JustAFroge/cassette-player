@@ -301,18 +301,24 @@ ul.vc-controls li,
     animation: none !important;
   }
 }
-/* Keep wheel containers responsive even if JS adds inline styles */
+/* --- Lock responsive wheel sizing during animation / inline-style updates --- */
 .vc-tape .vc-tape-wheel {
-  width: 21.32% !important;
-  aspect-ratio: 1 / 1 !important;
-  height: auto !important;
+  width: 21.32%;          /* responsive width tied to the tape */
+  height: auto;            /* let aspect-ratio define height */
+  aspect-ratio: 1 / 1 ;
+  border-radius: 50%;
 }
 
-/* Inner sprite fills the container and is the only element that rotates */
 .vc-tape .vc-tape-wheel > div {
-  width: 100% !important;
-  height: 100% !important;
-  background-size: 100% 100% !important;
+  width: 100%;
+  height: 100%;
+  background-size: 100% 100% ;
+  border-radius: 50%;
   transform-origin: 50% 50%;
-  will-change: transform;
+}
+
+/* If a play-state class exists, keep transforms purely rotational (no scale) */
+.vc-playing .vc-tape-wheel,
+.vc-playing .vc-tape-wheel > div {
+  transform: none ; /* prevents any accidental scale set inline */
 }
