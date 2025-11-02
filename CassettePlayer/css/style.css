@@ -322,3 +322,10 @@ ul.vc-controls li,
 .vc-playing .vc-tape-wheel > div {
   transform: none ; /* prevents any accidental scale set inline */
 }
+@media (max-width: 420px) {
+  /* Tame the rim thickness that JS sets in px so it doesn't overpower the wheel */
+  .vc-tape .vc-tape-wheel-left,
+  .vc-tape .vc-tape-wheel-right {
+    box-shadow: 0 0 0 clamp(12px, 7vw, 32px) #000;
+  }
+}
